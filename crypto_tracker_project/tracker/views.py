@@ -10,10 +10,10 @@ from .forms import CryptocurrencySearchForm
 
 
 def get_crypto_data(coin_id):
+    url = f"https://api.coingecko.com/api/v3/simple/price"  # Fixed: removed the inline params
     try:
-           url = f"https://api.coingecko.com/api/v3/simple/price?ids={crypto_id}&vs_currencies=usd"
         params = {
-            'ids': coin_id,
+            'ids': coin_id,  # Fixed: using correct variable name
             'vs_currencies': 'usd',
             'include_market_cap': 'true',
             'include_24hr_vol': 'true',
@@ -68,7 +68,7 @@ def index(request):
             if api_data and selected_crypto.coin_id in api_data:
                 data = api_data[selected_crypto.coin_id]
 
-                
+                # Save to price history
                 price_history = PriceHistory.objects.create(
                     cryptocurrency=selected_crypto,
                     price_usd=Decimal(str(data['usd'])),
@@ -77,7 +77,7 @@ def index(request):
                     price_change_24h=Decimal(str(data.get('usd_24h_change', 0)))
                 )
 
-                
+                # Save to search history
                 session_key = request.session.session_key
                 if not session_key:
                     request.session.create()
@@ -100,7 +100,7 @@ def index(request):
             else:
                 messages.error(request, 'Failed to fetch cryptocurrency data. Please try again.')
 
-    
+    # Get recent searches
     session_key = request.session.session_key
     if request.user.is_authenticated:
         recent_searches = SearchHistory.objects.filter(user=request.user)[:5]
@@ -137,7 +137,7 @@ def api_refresh_price(request, crypto_id):
         if api_data and cryptocurrency.coin_id in api_data:
             data = api_data[cryptocurrency.coin_id]
 
-        
+            # Save new price data
             PriceHistory.objects.create(
                 cryptocurrency=cryptocurrency,
                 price_usd=Decimal(str(data['usd'])),
