@@ -11,7 +11,7 @@ from .forms import CryptocurrencySearchForm
 
 def get_crypto_data(coin_id):
     try:
-        url = f"{settings.COINGECKO_API_URL}/simple/price"
+           url = f"https://api.coingecko.com/api/v3/simple/price?ids={crypto_id}&vs_currencies=usd"
         params = {
             'ids': coin_id,
             'vs_currencies': 'usd',
